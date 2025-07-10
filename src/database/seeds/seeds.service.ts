@@ -16,7 +16,7 @@ export class SeedsService {
 
   async seedAdminData() {
     const existing = await this.userRepo.findOne({
-      where: { username: adminCredential.username },
+      where: { email: adminCredential.email },
     });
 
     if (!existing) {

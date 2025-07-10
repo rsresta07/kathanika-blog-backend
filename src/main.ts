@@ -8,6 +8,7 @@ import { SwaggerModule } from "@nestjs/swagger";
 import swaggerConfig from "./config/swagger.config";
 import { ResponseInterceptor } from "./core/interceptors/response.interceptor";
 import { AppDataSource } from "./config/database.config";
+import { AllExceptionsFilter } from "./filters/http-exception.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,6 +30,7 @@ async function bootstrap() {
   );
   app.enableShutdownHooks();
   app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("api", app, document);

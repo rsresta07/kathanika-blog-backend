@@ -10,7 +10,7 @@ export const legalEntityTypes = [
 ];
 
 export const adminCredential = {
-  username: "admin@gmail.com",
+  email: "admin@gmail.com",
   password: "@password123",
   role: RoleEnum.SUPER_ADMIN,
   status: StatusEnum.PENDING,

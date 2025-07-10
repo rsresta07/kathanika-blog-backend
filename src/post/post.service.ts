@@ -22,7 +22,7 @@ export class PostService {
   //* Creating a post
   async create(userSlug: string, createPostDto: CreatePostDto) {
     try {
-      const user = await this.userRepository.findOneBy({ username: userSlug });
+      const user = await this.userRepository.findOneBy({ slug: userSlug });
       if (!user) {
         throw new HttpException(
           `User with slug '${userSlug}' not found`,
@@ -76,7 +76,7 @@ export class PostService {
       user: {
         id: post.user.id,
         fullName: post.user.fullName,
-        slug: post.user.username,
+        slug: post.user.slug,
       },
     };
   }
@@ -127,7 +127,7 @@ export class PostService {
         .where({ slug })
         .leftJoin("post.user", "user")
         .leftJoinAndSelect("post.tags", "tag")
-        .addSelect(["user.id", "user.email", "user.fullName", "user.username"])
+        .addSelect(["user.id", "user.email", "user.fullName", "user.slug"])
         .getOneOrFail();
     } catch (error) {
       if (

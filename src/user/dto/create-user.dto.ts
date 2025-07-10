@@ -5,7 +5,7 @@ export class CreateUserDto {
   fullName: string;
 
   @IsString()
-  username: string;
+  slug: string;
 
   @IsString()
   email: string;

@@ -36,25 +36,26 @@ export class UserService {
       .select([
         "user.id",
         "user.email",
-        "user.username",
+        "user.slug",
         "user.fullName",
         "user.location",
         "user.contact",
         "user.role",
         "user.status",
       ])
-      .leftJoin("user.posts", "posts")
+      .leftJoin("user.posts", "post")
       .addSelect([
-        "posts.id",
-        "posts.title",
-        "posts.image",
-        "posts.slug",
-        "posts.status",
+        "post.id",
+        "post.title",
+        "post.image",
+        "post.slug",
+        "post.status",
+        "post.createdAt", // ← explicitly added this!
       ])
-      .leftJoin("posts.tags", "tags")
-      .addSelect(["tags.id", "tags.title"])
-      .where("user.username = :username", { username: slug })
-      .orderBy("posts.createdAt", "DESC")
+      .leftJoin("post.tags", "tag")
+      .addSelect(["tag.id", "tag.title"])
+      .where("user.slug = :slug", { slug })
+      .orderBy("post.createdAt", "DESC") // ← alias must be "post", not "posts"
       .getOneOrFail();
   }
 
@@ -63,11 +64,11 @@ export class UserService {
       where: { id },
       select: [
         "id",
-        "username",
+        "slug",
         "fullName",
         "email",
-        "location",
-        "contact",
+        // "location",
+        // "contact",
         "role",
         "status",
       ],
@@ -84,7 +85,7 @@ export class UserService {
       .createQueryBuilder()
       .update(User)
       .set(dto)
-      .where("username = :slug", { slug })
+      .where("slug = :slug", { slug })
       .execute();
     return this.findOne(slug);
   }

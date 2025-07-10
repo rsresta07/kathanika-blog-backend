@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { LoginAuthDto, RegisterUserDto } from "./dto/create-auth.dto";
+import { LoginAuthDto, OauthDto, RegisterUserDto } from "./dto/create-auth.dto";
 import { BcryptService } from "./bcryptjs/bcrypt.service";
 import { UserService } from "src/user/user.service";
 import { JwtService } from "@nestjs/jwt";
@@ -9,6 +9,7 @@ import { RoleEnum, StatusEnum } from "src/utils/enum/role";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/entities/user.entity";
 import { DataSource, Repository } from "typeorm";
+import generateSlug from "src/utils/helpers/generateSlug";
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,53 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly dataSource: DataSource
   ) {}
+
+  async handleOauth(dto: OauthDto) {
+    try {
+      let user = await this.userRepo.findOne({
+        where: [
+          { provider: dto.provider, providerId: dto.providerId },
+          { email: dto.email },
+        ],
+      });
+
+      if (!user) {
+        user = this.userRepo.create({
+          email: dto.email,
+          fullName: dto.fullName,
+          provider: dto.provider,
+          providerId: dto.providerId,
+          avatar: dto.avatar,
+          slug: generateSlug(dto?.fullName),
+          role: RoleEnum.USER,
+          status: StatusEnum.APPROVED,
+          last_login_at: new Date(),
+        });
+      } else {
+        user.fullName = dto.fullName;
+        user.avatar = dto.avatar;
+        user.provider = dto.provider;
+        user.providerId = dto.providerId;
+        user.last_login_at = new Date();
+      }
+
+      await this.userRepo.save(user);
+      const token = await this.generateToken(user);
+
+      // Make sure this is the exact format expected by frontend
+      const response = {
+        token,
+        slug: user?.slug,
+        role: user?.role,
+      };
+
+      console.log("OAuth response being sent:", response);
+      return response;
+    } catch (error) {
+      console.error("OAuth error:", error);
+      throw error;
+    }
+  }
 
   async createUser(createUserDto: RegisterUserDto) {
     try {
@@ -36,7 +84,7 @@ export class AuthService {
         const data = {
           email: email?.trim(),
           password: hashedPassword,
-          username: createUserDto.username?.trim(),
+          slug: createUserDto.slug?.trim(),
           fullName: createUserDto.fullName?.trim(),
           role: RoleEnum.USER,
           location: createUserDto.location?.trim(),
@@ -54,7 +102,7 @@ export class AuthService {
           role: restPart.role,
           token,
           refreshToken: "",
-          slug: restPart.username,
+          slug: restPart.slug,
         };
       }
     } catch (error) {
@@ -79,7 +127,7 @@ export class AuthService {
               role: userData?.role,
               token,
               refreshToken: "",
-              slug: userData?.username,
+              slug: userData?.slug,
             };
           } else {
             throw new HttpException(
@@ -124,7 +172,7 @@ export class AuthService {
       {
         id: user.id,
         email: user.email,
-        username: user.username,
+        slug: user.slug,
         role: user.role,
       },
       {

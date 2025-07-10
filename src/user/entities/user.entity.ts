@@ -9,6 +9,7 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  UpdateDateColumn,
 } from "typeorm";
 import { Post } from "../../post/entities/post.entity";
 import { Tag } from "../../tags/entities/tag.entity";
@@ -24,40 +25,40 @@ export class User extends GenericEntity {
   @Column({
     type: "varchar",
     length: 100,
-    unique: true,
-    default: "username",
+    default: "slug",
   })
-  username: string;
+  slug: string;
 
   @Column({ type: "varchar", name: "full_name", default: "Mr. User" })
   fullName: string;
 
   @Exclude()
-  @Column()
-  password: string;
-
-  @Column({ type: "varchar", name: "location", default: "Kathmandu" })
-  location: string;
-
-  @Column({ type: "varchar", name: "contact", default: "9812345678" })
-  contact: string;
-
   @Column({ nullable: true })
-  refresh_token: string;
+  password?: string;
 
-  @Column({ type: "enum", enum: RoleEnum, default: RoleEnum.SUPER_ADMIN })
+  @Column({ type: "varchar", nullable: true })
+  provider: "google" | "facebook" | null;
+
+  @Column({ type: "varchar", nullable: true })
+  providerId: string | null;
+
+  @Column({ type: "text", nullable: true })
+  avatar: string | null;
+
+  @Column({ type: "enum", enum: RoleEnum, default: RoleEnum.USER }) // Changed from SUPER_ADMIN
   role: string;
 
-  @Column({ type: "enum", enum: StatusEnum, default: StatusEnum.PENDING })
+  @Column({ type: "enum", enum: StatusEnum, default: StatusEnum.APPROVED }) // Changed from PENDING
   status: StatusEnum;
 
-  @CreateDateColumn()
+  // Fix this - should be UpdateDateColumn for last_login_at
+  @UpdateDateColumn()
   last_login_at: Date;
 
   @OneToMany(() => Post, (post) => post.user)
   posts?: Post[];
 
   @ManyToMany(() => Tag, { eager: true })
-  @JoinTable({ name: "user_tags" }) // join table: user_tags(user_id, tag_id)
+  @JoinTable({ name: "user_tags" })
   preferences: Tag[];
 }

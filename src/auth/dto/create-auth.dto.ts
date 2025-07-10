@@ -17,7 +17,7 @@ export class RegisterUserDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ example: "chaaku" })
-  username: string;
+  slug: string;
 
   @IsNotEmpty()
   @IsString()
@@ -29,7 +29,7 @@ export class RegisterUserDto {
   @ApiProperty({ example: "test@gmail.com" })
   email: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @ApiProperty({ example: "@password123" })
   password: string;
@@ -47,4 +47,22 @@ export class RegisterUserDto {
   @IsString()
   @ApiProperty({ example: "koteshwor" })
   location: string;
+}
+
+export class OauthDto {
+  @IsString()
+  provider: "google" | "facebook";
+
+  @IsString()
+  providerId: string; // account.providerAccountId
+
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  fullName: string;
+
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 }

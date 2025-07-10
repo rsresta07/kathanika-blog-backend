@@ -1,9 +1,9 @@
-export default function generatePassword(username, contact) {
-  if (!username || !contact || contact.length < 4) {
-    throw new Error("Invalid username or contact");
+export default function generatePassword(slug, contact) {
+  if (!slug || !contact || contact.length < 4) {
+    throw new Error("Invalid slug or contact");
   }
 
-  const firstName = username.split(" ")[0];
+  const firstName = slug.split(" ")[0];
   const capitalLetter = firstName.charAt(0).toUpperCase();
   const otherLetters = firstName.split(" ")[0].slice(1);
 
