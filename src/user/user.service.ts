@@ -38,8 +38,8 @@ export class UserService {
         "user.email",
         "user.slug",
         "user.fullName",
-        "user.location",
-        "user.contact",
+        // "user.location",
+        // "user.contact",
         "user.role",
         "user.status",
       ])
